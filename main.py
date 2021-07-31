@@ -7,7 +7,7 @@ import logging
 import requests
 import json
 
-abs_plot_path = 'tmp1'
+abs_plot_path = '/tmp1'
 abs_tmp_upload_path = 'tmp_upload'
 rclone_api_endpoint = ''
 CREDENTIAL_URL = 'http://207.244.240.238:5000/credential'
@@ -58,8 +58,12 @@ def main():
     logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                         format='%(name)s - %(levelname)s - %(asctime)s - %(message)s ')
     logging.info('Program started')
+    count = 0
     while True:
-        logging.info('Checking folder {}'.format(abs_plot_path))
+        count += 1
+        if count >= 30:
+            logging.info('Checking folder {}'.format(abs_plot_path))
+            count = 0
         for file in os.listdir(abs_plot_path):
             if file.endswith('.plot'):
                 logging.info('Found file {} - Starting new thread for uploading...'.format(file))
