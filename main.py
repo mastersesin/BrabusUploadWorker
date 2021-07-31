@@ -4,6 +4,7 @@ import time
 import subprocess
 import uuid
 import logging
+from datetime import datetime
 
 abs_plot_path = 'tmp1'
 abs_tmp_upload_path = 'tmp_upload'
@@ -45,7 +46,7 @@ def upload_worker(file_name):
 
 def main():
     logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
-                        format='%(name)s - %(levelname)s - %(message)s')
+                        format='%(name)s - %(levelname)s - %(message)s - {}'.format(datetime.now()))
     logging.info('Program started')
     while True:
         logging.info('Checking folder {}'.format(abs_plot_path))
