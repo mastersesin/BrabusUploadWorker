@@ -2,6 +2,7 @@ import os
 import threading
 import time
 import subprocess
+import uuid
 
 abs_plot_path = 'tmp1'
 abs_tmp_upload_path = 'tmp_upload'
@@ -20,21 +21,24 @@ _test_token = '{"access_token":"ya29.a0ARrdaM94I6iStenAgGOP8rQBAjGMCuh-y4bW3Iw5T
 
 def upload_worker(file_name):
     print('Upload worker started')
+    rclone_mount_name = str(uuid.uuid4())
     os.system('mv {} {}'.format(
         os.path.join(abs_plot_path, file_name),
         os.path.join(abs_tmp_upload_path, file_name)
     ))
     os.system("echo '{}' >> {}".format(rclone_template.format(
-        'gdrive',
+        rclone_mount_name,
         _test_token
     ), rclone_config_file))
-    os.system('mkdir gdrive')
-    os.system('rclone mount gdrive:backup/ gdrive/ &')
+    os.system('mkdir {}'.format(rclone_mount_name))
+    os.system('rclone mount {}:backup/ {}/ &'.format(rclone_mount_name, rclone_mount_name))
     time.sleep(1)
-    os.system('mv {} {}'.format(
+    os.system('mv {} {}/'.format(
         os.path.join(abs_tmp_upload_path, file_name),
-        'gdrive/'
+        rclone_mount_name
     ))
+    os.system('fusermount -u {}'.format(rclone_mount_name))
+    os.system('rm -rf {}'.format(rclone_mount_name))
     print('Upload worker ended')
 
 
