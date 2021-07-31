@@ -3,7 +3,7 @@ import threading
 import time
 import subprocess
 
-abs_plot_path = '/tmp1'
+abs_plot_path = 'tmp1'
 abs_tmp_upload_path = 'tmp_upload'
 rclone_api_endpoint = ''
 rclone_template = """
@@ -30,9 +30,10 @@ def upload_worker(file_name):
     ), rclone_config_file))
     os.system('mkdir gdrive')
     os.system('rclone mount gdrive:backup/ gdrive/ &')
+    time.sleep(1)
     os.system('mv {} {}'.format(
         os.path.join(abs_tmp_upload_path, file_name),
-        os.path.join('grdive', file_name)
+        'gdrive/'
     ))
     print('Upload worker ended')
 
