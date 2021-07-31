@@ -46,7 +46,7 @@ def upload_worker(file_name):
 
 def main():
     logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
-                        format='%(name)s - %(levelname)s - %(message)s - {}'.format(datetime.now()))
+                        format='%(name)s - %(levelname)s - %(asctime)s - %(message)s ')
     logging.info('Program started')
     while True:
         logging.info('Checking folder {}'.format(abs_plot_path))
