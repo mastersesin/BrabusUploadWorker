@@ -1,0 +1,11 @@
+[Unit]
+Description="Upload service"
+
+[Service]
+User=ty
+# WorkingDirectory=/tmp1/afwfawefawegesrthsreth/
+# Environment=/tmp1/afwfawefawegesrthsreth/venv/
+ExecStart=python3 main.py
+
+[Install]
+WantedBy=multi-user.target
