@@ -45,13 +45,30 @@ def upload_worker(file_name):
     os.system('mkdir {}'.format(rclone_mount_name))
     os.system('rclone mount {}:backup/ {}/ &'.format(rclone_mount_name, rclone_mount_name))
     time.sleep(1)
-    os.system('mv {} {}/'.format(
+    os.system('cp {} {}/'.format(
         os.path.join(abs_tmp_upload_path, file_name),
         rclone_mount_name
     ))
-    os.system('fusermount -u {}'.format(rclone_mount_name))
+    list_file = subprocess.check_output(['ls', rclone_mount_name]).decode()
+    if list_file:
+        list_file = list_file.split('\n')
+        if file_name in list_file:
+            os.system('rm -rf {}'.format(os.path.join(abs_tmp_upload_path, file_name)))
+            logging.info('Upload worker ended')
+        else:
+            os.system('mv {} {}/'.format(
+                os.path.join(abs_tmp_upload_path, file_name),
+                abs_plot_path
+            ))
+            logging.info('File not in final destination')
+    else:
+        os.system('mv {} {}/'.format(
+            os.path.join(abs_tmp_upload_path, file_name),
+            abs_plot_path
+        ))
+        logging.info('Can not retrieve file in folder')
+    os.system('sudo fusermount -u {}'.format(rclone_mount_name))
     os.system('rm -rf {}'.format(rclone_mount_name))
-    logging.info('Upload worker ended')
 
 
 def main():
