@@ -44,7 +44,8 @@ def upload_worker(file_name):
     ), rclone_config_file))
     os.system('mkdir {}'.format(rclone_mount_name))
     os.system('rclone mount {}:backup/ {}/ &'.format(rclone_mount_name, rclone_mount_name))
-    time.sleep(1)
+    time.sleep(10)
+    logging.info('Start copy file {}'.format(file_name))
     os.system('cp {} {}/'.format(
         os.path.join(abs_tmp_upload_path, file_name),
         rclone_mount_name
