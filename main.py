@@ -43,7 +43,7 @@ def upload_worker(file_name):
         get_unused_credential()
     ), rclone_config_file))
     logging.info('Start copy file {}'.format(file_name))
-    command_return_obj = subprocess.run('rclone copy {} {}:backup/'.format(
+    command_return_obj = subprocess.run('rclone copy {} {}:backup/'.split(' ').format(
         os.path.join(abs_tmp_upload_path, file_name),
         rclone_mount_name
     ), capture_output=True)
