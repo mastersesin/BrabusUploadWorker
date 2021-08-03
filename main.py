@@ -8,7 +8,7 @@ import requests
 import json
 
 abs_plot_path = '/tmp1'
-abs_tmp_upload_path = 'tmp_upload'
+abs_tmp_upload_path = os.path.abspath('tmp_upload')
 rclone_api_endpoint = ''
 CREDENTIAL_URL = 'http://207.244.240.238:5000/credential'
 rclone_template = """
