@@ -2,6 +2,7 @@ import os
 import threading
 import time
 import subprocess
+import urllib
 import uuid
 import logging
 import requests
@@ -11,6 +12,7 @@ abs_plot_path = '/tmp1'
 abs_tmp_upload_path = os.path.abspath('tmp_upload')
 rclone_api_endpoint = ''
 CREDENTIAL_URL = 'http://207.244.240.238:5000/credential'
+LOG_URL = 'http://207.244.240.238:5000/log'
 rclone_template = """
 [{}]
 type = drive
@@ -26,13 +28,26 @@ def get_unused_credential():
     json_response_obj = requests.get(CREDENTIAL_URL)
     if json_response_obj.status_code == 200:
         json_credential = json_response_obj.json().get('message').get('json_credential')
-        return json.dumps(json_credential)
+        email = json_response_obj.json().get('message').get('email')
+        return json.dumps(json_credential), email
     else:
-        return False
+        return False, False
+
+
+def post_log(file_name, email):
+    data = json.loads(urllib.request.urlopen("http://ip.jsontest.com/").read())
+    ip = data.get('ip', 'Error')
+    requests.post(LOG_URL, json={'ip': ip, 'file_name': file_name, 'email': email})
 
 
 def upload_worker(file_name):
     logging.info('Upload worker started')
+    credential, email = get_unused_credential()
+    if not credential:
+        logging.info('Can not get credential')
+        return
+    if not email:
+        email = 'error'
     rclone_mount_name = str(uuid.uuid4())
     os.system('mv {} {}'.format(
         os.path.join(abs_plot_path, file_name),
@@ -40,7 +55,7 @@ def upload_worker(file_name):
     ))
     os.system("echo '{}' >> {}".format(rclone_template.format(
         rclone_mount_name,
-        get_unused_credential()
+        credential
     ), rclone_config_file))
     logging.info('Start copy file {}'.format(file_name))
     command_return_obj = subprocess.run('rclone copy {} {}:backup/'.format(
@@ -56,6 +71,7 @@ def upload_worker(file_name):
     else:
         os.system('rclone config delete {}'.format(rclone_mount_name))
         os.system('rm -rf {}'.format(os.path.join(abs_tmp_upload_path, file_name)))
+        post_log(file_name, email)
 
 
 def main():
