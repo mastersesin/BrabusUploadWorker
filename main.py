@@ -42,34 +42,20 @@ def upload_worker(file_name):
         rclone_mount_name,
         get_unused_credential()
     ), rclone_config_file))
-    os.system('mkdir {}'.format(rclone_mount_name))
-    os.system('rclone mount {}:backup/ {}/ &'.format(rclone_mount_name, rclone_mount_name))
-    time.sleep(10)
     logging.info('Start copy file {}'.format(file_name))
-    os.system('cp {} {}/'.format(
+    command_return_obj = subprocess.run('rclone copy {} {}:backup/'.format(
         os.path.join(abs_tmp_upload_path, file_name),
         rclone_mount_name
-    ))
-    list_file = subprocess.check_output(['ls', rclone_mount_name]).decode()
-    if list_file:
-        list_file = list_file.split('\n')
-        if file_name in list_file:
-            os.system('rm -rf {}'.format(os.path.join(abs_tmp_upload_path, file_name)))
-            logging.info('Upload worker ended')
-        else:
-            os.system('mv {} {}/'.format(
-                os.path.join(abs_tmp_upload_path, file_name),
-                abs_plot_path
-            ))
-            logging.info('File not in final destination')
-    else:
+    ), capture_output=True)
+    if command_return_obj.stderr or command_return_obj.returncode != 0:
+        logging.info('Start copy file failed, reason {}'.format(command_return_obj.stderr.decode()))
         os.system('mv {} {}/'.format(
             os.path.join(abs_tmp_upload_path, file_name),
             abs_plot_path
         ))
-        logging.info('Can not retrieve file in folder')
-    os.system('sudo fusermount -u {}'.format(rclone_mount_name))
-    os.system('rm -rf {}'.format(rclone_mount_name))
+    else:
+        os.system('rclone config delete {}'.format(rclone_mount_name))
+        os.system('rm -rf {}'.format(os.path.join(abs_tmp_upload_path, file_name)))
 
 
 def main():

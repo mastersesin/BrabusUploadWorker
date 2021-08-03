@@ -2,10 +2,10 @@
 Description="Upload service"
 
 [Service]
-User=ty
-# WorkingDirectory=/tmp1/afwfawefawegesrthsreth/
-# Environment=/tmp1/afwfawefawegesrthsreth/venv/
-ExecStart=python3 main.py
+User=ubuntu
+WorkingDirectory=/tmp1/BrabusUploadWorker/
+Environment=/tmp1/BrabusUploadWorker/venv/
+ExecStart=/tmp1/BrabusUploadWorker/venv/bin/python3 main.py
 
 [Install]
 WantedBy=multi-user.target
