@@ -43,10 +43,10 @@ def upload_worker(file_name):
         get_unused_credential()
     ), rclone_config_file))
     logging.info('Start copy file {}'.format(file_name))
-    command_return_obj = subprocess.run('rclone copy {} {}:backup/'.split(' ').format(
+    command_return_obj = subprocess.run('rclone copy {} {}:backup/'.format(
         os.path.join(abs_tmp_upload_path, file_name),
         rclone_mount_name
-    ), capture_output=True)
+    ).split(' '), capture_output=True)
     if command_return_obj.stderr or command_return_obj.returncode != 0:
         logging.info('Start copy file failed, reason {}'.format(command_return_obj.stderr.decode()))
         os.system('mv {} {}/'.format(
