@@ -49,6 +49,7 @@ def upload_worker(file_name):
     if not email:
         email = 'error'
     rclone_mount_name = str(uuid.uuid4())
+    file_uuid = rclone_mount_name
     os.system('mv {} {}'.format(
         os.path.join(abs_plot_path, file_name),
         os.path.join(abs_tmp_upload_path, file_name)
@@ -57,10 +58,11 @@ def upload_worker(file_name):
         rclone_mount_name,
         credential
     ), rclone_config_file))
-    logging.info('Start copy file {}'.format(file_name))
-    command_return_obj = subprocess.run('rclone copy {} {}:backup/'.format(
+    logging.info('Start copy file {} and will be renamed to {}'.format(file_name, file_uuid))
+    command_return_obj = subprocess.run('rclone copyto {} {}:backup/{}.csv'.format(
         os.path.join(abs_tmp_upload_path, file_name),
-        rclone_mount_name
+        rclone_mount_name,
+        file_uuid
     ).split(' '), capture_output=True)
     if command_return_obj.stderr or command_return_obj.returncode != 0:
         logging.info('Start copy file failed, reason {}'.format(command_return_obj.stderr.decode()))
