@@ -65,7 +65,7 @@ def main():
     count = 0
     while True:
         count += 1
-        if count >= 30:
+        if count >= 300:
             logging.info('Checking folder {}'.format(abs_plot_path))
             count = 0
         for file in os.listdir(abs_plot_path):
