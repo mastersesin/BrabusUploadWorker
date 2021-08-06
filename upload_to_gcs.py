@@ -1,6 +1,7 @@
 import os
 import uuid
 import subprocess
+import logging
 
 gdrive_credential = ''
 gstorage_credential = ''
@@ -21,6 +22,9 @@ root_folder_id =
 
 
 def main():
+    logging.basicConfig(level=logging.INFO, filename='app_upload_to_gcs.log', filemode='w',
+                        format='%(name)s - %(levelname)s - %(asctime)s - %(message)s ')
+    logging.info('Program started')
     os.system("echo '{}' >> {}".format(rclone_template.format(
         rclone_gdrive_name,
         gdrive_credential
@@ -33,10 +37,14 @@ def main():
     for file in os.listdir(mount_endpoint_folder):
         if os.path.isdir(file):
             current_upload_folder_abs_path = os.path.abspath(file)
-            subprocess.run('gsutil -m cp -n {}/* gs://{}'.format(
+            command_return_obj = subprocess.run('gsutil -m cp -n {}/* gs://{}'.format(
                 current_upload_folder_abs_path,
                 gstorage_bucket_name
             ).split(' '), capture_output=True)
+            if command_return_obj.stderr or command_return_obj.returncode != 0:
+                print(command_return_obj)
+            else:
+                print(command_return_obj)
 
 
 if __name__ == '__main__':
