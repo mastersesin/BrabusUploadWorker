@@ -34,8 +34,8 @@ sudo systemctl start upload.service
 
 chia_plot_string = 'tmux new-session -d -s "myTempSession1" ./chia_plot -t /tmp1/tmp/ -2 /mnt/ram/ -d /tmp1/ -r 32 -n -1 -c xch1xsjaqskkkq6hvlvvall4042jeqd3jygarsrdnmrua7wjjtt0k5fqn9w8aa -f 95999787516a65e3afdd55a583001b56e7ec371f83ceb47f412779ef43460d9cd0d7583b9c3e99fd961c9591b4f95070'
 
-PEM_PATH = 'pem'
-run_file = open('pem/ip_map_pem.txt', 'r')
+PEM_PATH = 'pem_credential'
+run_file = open('{}/pem_map_ip.txt'.format(PEM_PATH), 'r')
 list_thread = []
 
 
@@ -57,20 +57,36 @@ def worker(paramiko_ssh_key, paramiko_connect_ip, command):
     elif command == '2':
         ssh.exec_command("sudo pkill chia_plot")
         ssh.exec_command("sudo rm -rf /mnt/ram/*")
+        ssh.exec_command("sudo rm -rf /tmp1/tmp/*")
         ssh.exec_command("cd /tmp1/BrabusUploadWorker &&" + chia_plot_string)
+    elif command == '3':
+        stdin, stdout, stderr = ssh.exec_command('sudo systemctl is-active upload.service', get_pty=True)
+        for content in iter(stdout.readline, ""):
+            print(content, end="")
+        stdin, stdout, stderr = ssh.exec_command('sudo pidof chia_plot', get_pty=True)
+        for content in iter(stdout.readline, ""):
+            print(content, end="")
+    elif command == '4':
+        ssh.exec_command("mv /tmp1/BrabusUploadWorker/tmp_upload/*.plot /tmp1")
+        ssh.exec_command("sudo systemctl restart upload.service")
+        # ssh.exec_command("cd /tmp1/BrabusUploadWorker &&" + chia_plot_string)
 
 
-input_command = input('1 run upload 2 run plot_chia')
+input_command = input('1 run upload 2 run plot_chia 3 check upload / chia_plot 4 restart upload')
 
 for line in run_file:
+    if line.startswith('#'):
+        continue
     print(line.rstrip().split())
     ip, pem_name = line.rstrip().split()
     new_thread = threading.Thread(target=worker, args=[pem_name, ip, input_command])
     new_thread.start()
-    list_thread.append(new_thread)
+    # list_thread.append(new_thread)
     time.sleep(0.1)
+    if input_command == '1' or input_command == '3':
+        new_thread.join()
 
-for thread in list_thread:
-    thread.join()
+# for thread in list_thread:
+#     thread.join()
 
 print('done 2')
