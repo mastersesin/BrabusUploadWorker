@@ -1,87 +1,211 @@
-import os
-import time
-import uuid
+import hashlib
+import sys
 import subprocess
-import logging
-import json
+import threading
+import os
+import math
+import time
+import email.utils
 
-gdrive_credential_list = [
-    {
-        'email': 'shalatuttle3233@gmail.com',
-        'json_credential': {
-            "access_token": "ya29.a0ARrdaM_9qDOt-h1ZsuZrjuEIRmRVYqfmozN04CVigRnwASPSFvjwpjxhsfliiFFSLBQ6zZAFwFnxd7oJSgZ3vKXNWaWsos3Sl60otbKmCWXKNmmCAnNsmnC29RPLWRr7UoKgkvkGQ6dMs5pizSUZiHdIOIzv",
-            "token_type": "Bearer",
-            "refresh_token": "1//0gSYDap7LN2QxCgYIARAAGBASNwF-L9IrWfGOqGulOuzpuWTtYm3G15I5_VUwKg4bzYxWDwlFbIex7R6TXozbiBR-iZur8QVRJEU",
-            "expiry": "2021-08-07T19:29:16.382589+07:00"}
-    }
-]
-gdrive_credential = {
-    "access_token": "ya29.a0ARrdaM_9qDOt-h1ZsuZrjuEIRmRVYqfmozN04CVigRnwASPSFvjwpjxhsfliiFFSLBQ6zZAFwFnxd7oJSgZ3vKXNWaWsos3Sl60otbKmCWXKNmmCAnNsmnC29RPLWRr7UoKgkvkGQ6dMs5pizSUZiHdIOIzv",
-    "token_type": "Bearer",
-    "refresh_token": "1//0gSYDap7LN2QxCgYIARAAGBASNwF-L9IrWfGOqGulOuzpuWTtYm3G15I5_VUwKg4bzYxWDwlFbIex7R6TXozbiBR-iZur8QVRJEU",
-    "expiry": "2021-08-07T19:29:16.382589+07:00"}
-root_gdrive_source_folder = 'acc_3'
-mount_endpoint_folder = root_gdrive_source_folder  # Usually the same as root_gdrive_source_folder
-gstorage_bucket_name = 'cloud3bucket2'
-rclone_config_file = subprocess.check_output('rclone config file'.split()).decode().split('\n')[1]
-rclone_gdrive_name = str(uuid.uuid4())
-rclone_template = """
-[{}]
-type = drive
-scope = drive
-token = {} 
-team_drive = 0AKUkmbvSaV-CUk9PVA
-root_folder_id =
-"""
+import requests
+
+from bs4 import BeautifulSoup
+
+# FOLDER_ABS_PATH = 'C:\\Users\\maste\\PycharmProjects\\BrabusUploadWorker\\diablo2.zip'
+try:
+    FILE_ABS_PATH = sys.argv[1]
+    BUCKET_NAME = sys.argv[2]
+    # FILE_ABS_PATH = 'C:\\Users\\maste\\PycharmProjects\\BrabusUploadWorker\\nayhayne5.ts'
+    # DESTINATION_FOLDER_NAME = 'test'
+except IndexError:
+    FILE_ABS_PATH = None
+    BUCKET_NAME = None
 
 
-def main():
-    logging.basicConfig(level=logging.INFO, filename='app_upload_to_gcs.log', filemode='w',
-                        format='%(name)s - %(levelname)s - %(asctime)s - %(message)s ')
-    print('Program started')
-    os.system('mkdir {}'.format(mount_endpoint_folder))
-    print('mkdir done')
-    os.system("echo '{}' >> {}".format(rclone_template.format(
-        rclone_gdrive_name,
-        json.dumps(gdrive_credential)
-    ), rclone_config_file))
-    print('add rclone config done')
-    os.system('rclone mount {}:{}/ {} --vfs-read-chunk-size 256M --transfers 16 &'.format(
-        rclone_gdrive_name,
-        root_gdrive_source_folder,
-        mount_endpoint_folder
-    ))
-    print('mount done')
-    input('press any key to continue')
-    print('start search in {}'.format(mount_endpoint_folder))
-    # for file in os.listdir(mount_endpoint_folder):
-    #     print(file)
-    #     if os.path.isdir(os.path.join(mount_endpoint_folder, file)):
-    #         print('processing folder {}'.format(file))
-    #         current_upload_folder_abs_path = os.path.abspath(os.path.join(mount_endpoint_folder, file))
-    command_return_obj = os.system('gsutil -m cp -n {}/* gs://{}'.format(
-        mount_endpoint_folder,
-        gstorage_bucket_name
-    ))
-    # while True:
-    #     line = command_return_obj.stdout.readline().rstrip().decode()
-    #     print(line)
-    #     if not line:
-    #         break
-    #     time.sleep(0.1)
-    # for content in iter(command_return_obj.stdout.readline, b''):
-    #     output = content.rstrip().decode()
-    #     print(output)
-    # command_return_obj = subprocess.run('gsutil -m cp -n {}/* gs://{}'.format(
-    #     current_upload_folder_abs_path,
-    #     gstorage_bucket_name
-    # ).split(' '), capture_output=True)
-    print(command_return_obj, 'Return code')
-    # if command_return_obj.stderr or command_return_obj.returncode != 0:
-    #     print(command_return_obj)
-    # else:
-    #     print(command_return_obj)
+class UploadToGcsWorker(threading.Thread):
+    THREAD_COUNT = 2
+    CHUNK_SIZE = 512 * 1000 * 1000
+
+    def __init__(self, bucket_name, abs_file_name):
+        threading.Thread.__init__(self)
+        self.bucket_name = bucket_name
+        self.abs_file_path = abs_file_name
+        self.file_name = os.path.basename(self.abs_file_path)
+        self.access_token = self._get_access_token()
+        print('Got token: {}'.format(self.access_token))
+        self.upload_id = self._init_multipart_upload_and_get_upload_id(self.access_token, self.bucket_name,
+                                                                       self.file_name)
+        self.part_buff_list = self._split_file_into_parts(self.abs_file_path, self.CHUNK_SIZE)
+        self.lock = threading.RLock()
+        self.etag_map = {}
+        self.list_thread = []
+        self.latest_chunk_position = 0
+        self.file_size = os.path.getsize(self.abs_file_path)
+
+    @staticmethod
+    def _get_access_token():
+        command_return_obj = subprocess.run('gcloud auth print-access-token'.split(' '), capture_output=True)
+        if command_return_obj.returncode == 0:
+            return command_return_obj.stdout.decode().strip()
+        else:
+            return False
+
+    @staticmethod
+    def _init_multipart_upload_and_get_upload_id(access_token, bucket_name, file_name):
+        if not access_token:
+            return False
+        endpoint = 'https://storage.googleapis.com/{bucket_name}/{file_name}?uploads'.format(
+            bucket_name=bucket_name,
+            file_name=file_name,
+        )
+        headers = {'Authorization': 'Bearer {access_token}'.format(access_token=access_token)}
+        response = requests.post(endpoint, headers=headers)
+        if not response.status_code == 200:
+            return False
+        soup = BeautifulSoup(response.text, 'xml')
+        if not soup.find('InitiateMultipartUploadResult').find('UploadId'):
+            return False
+        return soup.find('InitiateMultipartUploadResult').find('UploadId').get_text()
+
+    @staticmethod
+    def _split_file_into_parts(abs_file_path, chunk_size):
+        file_size = os.path.getsize(abs_file_path)
+        if file_size < chunk_size:
+            return [[0, file_size]]
+        return_buff_list = [[chunk_size * part + 1, chunk_size * (1 + part)] for part in
+                            range(math.ceil(file_size / chunk_size))]
+        return_buff_list[len(return_buff_list) - 1][1] = file_size
+        return_buff_list[0][0] = 0
+        return return_buff_list
+
+    def _generate_xml_to_complete_multipart_upload(self):
+        s = BeautifulSoup(features='html.parser')
+        root_tag = s.new_tag('CompleteMultipartUpload')
+        for part in sorted(self.etag_map):
+            part_tag = s.new_tag('Part')
+            part_number = s.new_tag('PartNumber')
+            etag = s.new_tag('ETag')
+            part_number.string = str(part)
+            etag.string = self.etag_map[part]
+            part_tag.append(part_number)
+            part_tag.append(etag)
+            root_tag.append(part_tag)
+        soup = BeautifulSoup(str(root_tag), "xml")
+        return soup.prettify()
+
+    def _submit_uploaded_object(self):
+        print('Start submit finished object')
+        endpoint = 'https://storage.googleapis.com/' + \
+                   '{bucket_name}/{file_name}?uploadId={upload_id}'.format(
+                       bucket_name=self.bucket_name,
+                       file_name=self.file_name,
+                       upload_id=self.upload_id
+                   )
+        headers = {
+            'Authorization': 'Bearer {access_token}'.format(access_token=self.access_token),
+            'Content-Type': 'application/xml',
+            'Host': 'storage.googleapis.com',
+            'Date': email.utils.formatdate(usegmt=True)
+        }
+        test = self._generate_xml_to_complete_multipart_upload()
+        return requests.post(endpoint, data=test, headers=headers)
+
+    def _make_put_request_to_upload_chunked_file(self, access_token, bucket_name, file_name, part_number, upload_id
+                                                 , chunk_data, retry_time=0):
+        endpoint = 'https://storage.googleapis.com/' + \
+                   '{bucket_name}/{file_name}?partNumber={part_number}&uploadId={upload_id}'.format(
+                       bucket_name=bucket_name,
+                       file_name=file_name,
+                       part_number=part_number,
+                       upload_id=upload_id,
+                   )
+        headers = {
+            'Authorization': 'Bearer {access_token}'.format(access_token=access_token),
+        }
+        re = requests.put(endpoint, data=chunk_data, headers=headers)
+        if re.status_code == 200 and re.headers.get('ETag').replace('\"', '') == hashlib.md5(chunk_data).hexdigest():
+            with self.lock:
+                self.etag_map[part_number] = re.headers.get('ETag')
+        else:
+            if retry_time == 5:
+                print('Error on upload chunk will abort')
+                os.abort()
+            print('Error on upload chunk will retry {}/5'.format(retry_time + 1))
+            self._make_put_request_to_upload_chunked_file(access_token, bucket_name, file_name, part_number,
+                                                          upload_id, chunk_data, retry_time + 1)
+
+    @staticmethod
+    def read_in_chunks(file_object, chunk_size=CHUNK_SIZE):
+        """Lazy function (generator) to read a file piece by piece.
+        Default chunk size: 1k."""
+        while True:
+            data = file_object.read(chunk_size)
+            if not data:
+                break
+            yield data
+
+    def check_file_is_existed(self) -> bool:
+        endpoint = 'https://storage.googleapis.com/{}?acl'.format(self.file_name)
+        headers = {
+            'Authorization': 'Bearer {access_token}'.format(access_token=self.access_token),
+            'Host': '{}.storage.googleapis.com'.format(self.bucket_name),
+        }
+        re = requests.get(endpoint, headers=headers)
+        if re.status_code != 200:
+            return False
+        return True
+
+    def run(self):
+        if self.check_file_is_existed():
+            print('File <{}> existed'.format(self.file_name))
+            return
+        if self.upload_id:
+            with open(self.abs_file_path, 'rb') as f:
+                part = 1
+                total_uploaded = 0
+                while True:
+                    chunk_data = f.read(self.CHUNK_SIZE)
+                    if not chunk_data:
+                        break
+                    print('File {} upload in progress {}% ...'.format(self.file_name,
+                                                                      int(total_uploaded * 100 /
+                                                                          self.file_size)))
+                    while len(self.list_thread) >= self.THREAD_COUNT:
+                        self.list_thread = [thread for thread in self.list_thread if thread.is_alive()]
+                        time.sleep(0.01)
+                    upload_parts_worker = threading.Thread(
+                        target=self._make_put_request_to_upload_chunked_file,
+                        args=[
+                            self.access_token,
+                            self.bucket_name,
+                            self.file_name,
+                            part,
+                            self.upload_id,
+                            chunk_data
+                        ]
+                    )
+                    upload_parts_worker.start()
+                    self.list_thread.append(upload_parts_worker)
+                    part += 1
+                    total_uploaded += len(chunk_data)
+            f.close()
+            for t in self.list_thread:
+                t.join()
+
+            # Check total part in happy case vs real equal
+            if math.ceil(self.file_size / self.CHUNK_SIZE) == len(self.etag_map):
+                print('Total upload part checked ok')
+                response = self._submit_uploaded_object()
+                print(response.status_code, 'Return status code', response.text)
+            else:
+                print('Missing some part of file')
+                pass
+        else:
+            print('Token error')
 
 
-if __name__ == '__main__':
-    main()
+if FILE_ABS_PATH and BUCKET_NAME:
+    worker = UploadToGcsWorker(BUCKET_NAME, FILE_ABS_PATH)
+    worker.start()
+else:
+    print('Please specify abs path, bucket name and destination folder name of upload file')

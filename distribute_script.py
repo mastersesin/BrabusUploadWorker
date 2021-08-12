@@ -9,10 +9,9 @@ STARTUP_SCRIPT = """
 rm -rf run.sh
 sudo systemctl stop upload.service
 sudo apt update && sudo apt install mdadm --no-install-recommends
-sudo mdadm --create /dev/md0 --level=0 --raid-devices=2 /dev/nvme2n1 /dev/nvme1n1
-sudo mkfs.ext4 -F /dev/md0
+sudo mkfs.ext4 -F /dev/nvme1n1
 sudo mkdir -p /tmp1
-sudo mount /dev/md0 /tmp1
+sudo mount /dev/nvme1n1 /tmp1
 sudo chmod 777 /tmp1
 sudo mkdir /mnt/ram
 sudo rm -rf /mnt/ram/*

@@ -1,0 +1,11 @@
+[Unit]
+Description="Check plot service"
+
+[Service]
+User=ubuntu
+WorkingDirectory=/tmp1/BrabusUploadWorker/
+Environment=/tmp1/BrabusUploadWorker/venv/
+ExecStart=/tmp1/BrabusUploadWorker/venv/bin/python3 checkplot.py
+
+[Install]
+WantedBy=multi-user.target
