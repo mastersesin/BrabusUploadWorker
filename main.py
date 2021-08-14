@@ -35,8 +35,7 @@ def get_unused_credential():
 
 
 def post_log(file_name, email):
-    data = json.loads(urllib.request.urlopen("http://ip.jsontest.com/").read())
-    ip = data.get('ip', 'Error')
+    ip = requests.get('https://bot.whatismyipaddress.com').text
     requests.post(LOG_URL, json={'ip': ip, 'file_name': file_name, 'email': email})
 
 
