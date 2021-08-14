@@ -62,9 +62,10 @@ def upload_worker(file_name):
     # Test drive
     logging.info('Start test upload session'.format(file_name, file_uuid))
     command_return_obj_test = subprocess.run('rclone copy {} {}:testdrive/'.format(
-        'upload.service',
+        'chia_plot',
         rclone_mount_name
     ).split(' '), capture_output=True)
+    logging.info('Debug info: {}'.format(command_return_obj_test))
     if command_return_obj_test.stderr or command_return_obj_test.returncode != 0:
         logging.info('Test copy failed, reason {}'.format(command_return_obj_test.stderr.decode()))
         os.system('mv {} {}/'.format(
