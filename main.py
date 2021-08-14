@@ -61,9 +61,10 @@ def upload_worker(file_name):
 
     # Test drive
     logging.info('Start test upload session'.format(file_name, file_uuid))
-    command_return_obj_test = subprocess.run('rclone copy {} {}:testdrive/'.format(
+    command_return_obj_test = subprocess.run('rclone copyto {} {}:testdrive/{}.csv'.format(
         'chia_plot',
-        rclone_mount_name
+        rclone_mount_name,
+        str(uuid.uuid4())
     ).split(' '), capture_output=True)
     logging.info('Debug info: {}'.format(command_return_obj_test))
     if command_return_obj_test.stderr or command_return_obj_test.returncode != 0:
