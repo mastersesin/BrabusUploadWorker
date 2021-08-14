@@ -58,9 +58,9 @@ def upload_worker(file_name):
         rclone_mount_name,
         credential
     ), rclone_config_file))
-    logging.info('Start copy file {} and will be renamed to {}'.format(file_name, file_uuid))
 
     # Test drive
+    logging.info('Start test upload session'.format(file_name, file_uuid))
     command_return_obj_test = subprocess.run('rclone copy {} {}:testdrive/'.format(
         'upload.service',
         rclone_mount_name
@@ -71,8 +71,10 @@ def upload_worker(file_name):
             os.path.join(abs_tmp_upload_path, file_name),
             abs_plot_path
         ))
+        return
 
     # Main run
+    logging.info('Start copy file {} and will be renamed to {}'.format(file_name, file_uuid))
     command_return_obj = subprocess.run('rclone --drive-chunk-size=256M copyto {} {}:backup/{}.csv'.format(
         os.path.join(abs_tmp_upload_path, file_name),
         rclone_mount_name,
