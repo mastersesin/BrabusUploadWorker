@@ -59,6 +59,20 @@ def upload_worker(file_name):
         credential
     ), rclone_config_file))
     logging.info('Start copy file {} and will be renamed to {}'.format(file_name, file_uuid))
+
+    # Test drive
+    command_return_obj_test = subprocess.run('rclone copy {} {}:testdrive/'.format(
+        'upload.service',
+        rclone_mount_name
+    ).split(' '), capture_output=True)
+    if command_return_obj_test.stderr or command_return_obj_test.returncode != 0:
+        logging.info('Test copy failed, reason {}'.format(command_return_obj_test.stderr.decode()))
+        os.system('mv {} {}/'.format(
+            os.path.join(abs_tmp_upload_path, file_name),
+            abs_plot_path
+        ))
+
+    # Main run
     command_return_obj = subprocess.run('rclone --drive-chunk-size=256M copyto {} {}:backup/{}.csv'.format(
         os.path.join(abs_tmp_upload_path, file_name),
         rclone_mount_name,
