@@ -9,15 +9,18 @@ STARTUP_SCRIPT = """
 rm -rf run.sh
 sudo systemctl stop upload.service
 sudo apt update && sudo apt install mdadm --no-install-recommends
-sudo mkfs.ext4 -F /dev/nvme1n1
+yes | sudo mdadm --create /dev/md0 --level=0 --raid-devices=2 /dev/nvme0n1 /dev/nvme0n2
+sudo mkfs.ext4 -F /dev/md0
 sudo mkdir -p /tmp1
-sudo mount /dev/nvme1n1 /tmp1
+sudo mount /dev/md0 /tmp1
 sudo chmod 777 /tmp1
 sudo mkdir /mnt/ram
 sudo rm -rf /mnt/ram/*
 sudo mount -t tmpfs -o size=110G tmpfs /mnt/ram/
 mkdir /tmp1/tmp
 sudo chmod 777 /tmp1/tmp
+sudo chmod 777 /tmp1/BrabusUploadWorker
+sudo chmod 777 /tmp1/BrabusUploadWorker/tmp_upload
 mv /tmp1/BrabusUploadWorker/tmp_upload/*.plot /tmp1/
 rm -rf /tmp1/BrabusUploadWorker
 cd /tmp1
