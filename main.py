@@ -61,7 +61,7 @@ def upload_worker(file_name):
     # Test drive
     logging.info('Start test upload session'.format(file_name, file_uuid))
     command_return_obj_test = subprocess.run('rclone copyto {} {}:testdrive/{}.csv'.format(
-        'chia_plot',
+        'fastapi',
         rclone_mount_name,
         str(uuid.uuid4())
     ).split(' '), capture_output=True)
