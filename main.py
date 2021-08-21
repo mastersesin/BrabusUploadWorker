@@ -49,7 +49,7 @@ def upload_worker(file_name):
         email = 'error'
     rclone_mount_name = str(uuid.uuid4())
     file_uuid = rclone_mount_name
-    os.system('mv {} {}'.format(
+    os.system('mv {} {}.csv'.format(
         os.path.join(abs_plot_path, file_name),
         os.path.join(abs_tmp_upload_path, file_uuid)
     ))
@@ -61,7 +61,7 @@ def upload_worker(file_name):
     # Main run
     logging.info('Start copy file {} and will be renamed to {}'.format(file_name, file_uuid))
 
-    command_return_obj = subprocess.run('rclone --drive-chunk-size=256M copy {} {}:backup/'.format(
+    command_return_obj = subprocess.run('rclone --drive-chunk-size=256M copy {}.csv {}:backup/'.format(
         os.path.join(abs_tmp_upload_path, file_uuid),
         rclone_mount_name,
     ).split(' '), capture_output=True)
