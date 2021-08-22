@@ -62,6 +62,7 @@ class UploadToGcsWorker(threading.Thread):
             'Content-Type': 'text/csv'
         }
         response = requests.post(endpoint, headers=headers)
+        print(response.text)
         if not response.status_code == 200:
             return False
         soup = BeautifulSoup(response.text, 'xml')
