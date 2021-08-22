@@ -23,8 +23,8 @@ except IndexError:
 
 
 class UploadToGcsWorker(threading.Thread):
-    THREAD_COUNT = 2
-    CHUNK_SIZE = 512 * 1000 * 1000
+    THREAD_COUNT = 6
+    CHUNK_SIZE = 256 * 1000 * 1000
 
     def __init__(self, bucket_name, abs_file_name):
         threading.Thread.__init__(self)
@@ -32,7 +32,6 @@ class UploadToGcsWorker(threading.Thread):
         self.abs_file_path = abs_file_name
         self.file_name = os.path.basename(self.abs_file_path)
         self.access_token = self._get_access_token()
-        print('Got token: {}'.format(self.access_token))
         self.upload_id = self._init_multipart_upload_and_get_upload_id(self.access_token, self.bucket_name,
                                                                        self.file_name)
         self.part_buff_list = self._split_file_into_parts(self.abs_file_path, self.CHUNK_SIZE)
@@ -58,7 +57,10 @@ class UploadToGcsWorker(threading.Thread):
             bucket_name=bucket_name,
             file_name=file_name,
         )
-        headers = {'Authorization': 'Bearer {access_token}'.format(access_token=access_token)}
+        headers = {
+            'Authorization': 'Bearer {access_token}'.format(access_token=access_token),
+            'Content-Type': 'text/csv'
+        }
         response = requests.post(endpoint, headers=headers)
         if not response.status_code == 200:
             return False
@@ -157,7 +159,6 @@ class UploadToGcsWorker(threading.Thread):
 
     def run(self):
         if self.check_file_is_existed():
-            print('File <{}> existed'.format(self.file_name))
             return
         if self.upload_id:
             with open(self.abs_file_path, 'rb') as f:
@@ -167,9 +168,6 @@ class UploadToGcsWorker(threading.Thread):
                     chunk_data = f.read(self.CHUNK_SIZE)
                     if not chunk_data:
                         break
-                    print('File {} upload in progress {}% ...'.format(self.file_name,
-                                                                      int(total_uploaded * 100 /
-                                                                          self.file_size)))
                     while len(self.list_thread) >= self.THREAD_COUNT:
                         self.list_thread = [thread for thread in self.list_thread if thread.is_alive()]
                         time.sleep(0.01)
