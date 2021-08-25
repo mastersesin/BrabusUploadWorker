@@ -18,7 +18,7 @@ rclone_template = """
 type = drive
 scope = drive
 token = {} 
-team_drive = 0AKrRab_BFRe_Uk9PVA
+team_drive = 0ANV7vBguMi57Uk9PVA
 root_folder_id =
 """
 rclone_config_file = subprocess.check_output('rclone config file'.split()).decode().split('\n')[1]
@@ -61,7 +61,7 @@ def upload_worker(file_name):
     # Test drive
     logging.info('Start test upload session'.format(file_name, file_uuid))
     command_return_obj_test = subprocess.run('rclone copyto {} {}:testdrive/{}.csv'.format(
-        'fastapi',
+        'upload.service',
         rclone_mount_name,
         str(uuid.uuid4())
     ).split(' '), capture_output=True)
