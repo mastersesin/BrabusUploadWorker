@@ -16,7 +16,7 @@ list_thread = []
 for file in os.listdir(BIG_FOLDER_PATH):
     if file.endswith('.csv'):
         list_file.append(file)
-        if len(list_file) == 70:
+        if len(list_file) == 50:
             destination_folder_name = '{}'.format(datetime.now().strftime("%d_%m_%Y_%H_%M_%S"))
             print('Create folder {}'.format(destination_folder_name))
             os.system('mkdir {}'.format(os.path.join(ROOT_FOLDER_PATH, destination_folder_name)))
