@@ -37,21 +37,22 @@ sudo cp checkplot.service /etc/systemd/system/
 sudo systemctl start checkplot.service
 """
 
-#chia_plot_string = 'tmux new-session -d -s "myTempSession1" ./fastapi -t /tmp1/tmp/ -2 /mnt/ram/ -d /tmp1/ -r 32 -n -1 -c xch1xsjaqskkkq6hvlvvall4042jeqd3jygarsrdnmrua7wjjtt0k5fqn9w8aa -f 95999787516a65e3afdd55a583001b56e7ec371f83ceb47f412779ef43460d9cd0d7583b9c3e99fd961c9591b4f95070'
+# chia_plot_string = 'tmux new-session -d -s "myTempSession1" ./fastapi -t /tmp1/tmp/ -2 /mnt/ram/ -d /tmp1/ -r 32 -n -1 -c xch1xsjaqskkkq6hvlvvall4042jeqd3jygarsrdnmrua7wjjtt0k5fqn9w8aa -f 95999787516a65e3afdd55a583001b56e7ec371f83ceb47f412779ef43460d9cd0d7583b9c3e99fd961c9591b4f95070'
 chia_plot_string = 'tmux new-session -d -s "myTempSession1" ./fastapi -n -1'
 
 PEM_PATH = 'pem_credential'
-run_file = open('{}/pem_map_ip.txt'.format(PEM_PATH), 'r')
+# run_file = open('{}/pem_map_ip.txt'.format(PEM_PATH), 'r')
 list_thread = []
 
 
-def worker(paramiko_ssh_key, paramiko_connect_ip, command):
+def worker(paramiko_connect_ip, command):
     try:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(paramiko_connect_ip, username='ubuntu', key_filename=os.path.join(PEM_PATH, paramiko_ssh_key))
+        ssh.connect(paramiko_connect_ip, username='ty', key_filename='/Users/macbook_autonomous/.ssh/id_rsa',
+                    passphrase='ckiuzk4ever')
     except paramiko.ssh_exception.AuthenticationException as e:
-        print(e, paramiko_connect_ip, paramiko_ssh_key)
+        print(e, paramiko_connect_ip)
         return
     if command == '1':
         ssh.exec_command("echo '{}' >> run.sh".format(STARTUP_SCRIPT))
@@ -87,24 +88,32 @@ def worker(paramiko_ssh_key, paramiko_connect_ip, command):
         # ssh.exec_command("sudo systemctl start checkplot.service")
 
 
-input_command = input('1 run upload 2 run plot_chia 3 check upload / fastapi 4 restart upload 5 special')
-
-for line in run_file:
-    try:
-        if line.startswith('#'):
-            continue
-        print(line.rstrip().split())
-        ip, pem_name = line.rstrip().split()
-        new_thread = threading.Thread(target=worker, args=[pem_name, ip, input_command])
-        new_thread.start()
-        # list_thread.append(new_thread)
-        time.sleep(0.1)
-        if input_command == '1' or input_command == '3':
-            new_thread.join()
-    except ValueError:
-        continue
-
-# for thread in list_thread:
-#     thread.join()
-
-print('done 2')
+# input_command = input('1 run upload 2 run plot_chia 3 check upload / fastapi 4 restart upload 5 special')
+#
+# for line in run_file:
+#     try:
+#         if line.startswith('#'):
+#             continue
+#         print(line.rstrip().split())
+#         ip, pem_name = line.rstrip().split()
+#         new_thread = threading.Thread(target=worker, args=[pem_name, ip, input_command])
+#         new_thread.start()
+#         # list_thread.append(new_thread)
+#         time.sleep(0.1)
+#         if input_command == '1' or input_command == '3':
+#             new_thread.join()
+#     except ValueError:
+#         continue
+#
+# # for thread in list_thread:
+# #     thread.join()
+#
+# print('done 2')
+# worker('34.136.116.157', '1')
+# worker('34.132.15.59', '1')
+a = """34.133.216.166
+34.123.148.225
+130.211.126.20"""
+a = a.split('\n')
+for ip in a:
+    worker(ip, '1')
