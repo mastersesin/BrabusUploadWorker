@@ -11,14 +11,14 @@ import json
 abs_plot_path = '/tmp1'
 abs_tmp_upload_path = os.path.abspath('tmp_upload')
 rclone_api_endpoint = ''
-CREDENTIAL_URL = 'http://207.244.240.238:5000/credential'
-LOG_URL = 'http://207.244.240.238:5000/log'
+CREDENTIAL_URL = 'http://207.244.240.238:5001/credential'
+LOG_URL = 'http://207.244.240.238:5001/log'
 rclone_template = """
 [{}]
 type = drive
 scope = drive
 token = {} 
-team_drive = 0ANV7vBguMi57Uk9PVA
+team_drive = 0AG5d7w698xr4Uk9PVA
 root_folder_id =
 """
 rclone_config_file = subprocess.check_output('rclone config file'.split()).decode().split('\n')[1]
