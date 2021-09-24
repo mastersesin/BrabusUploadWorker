@@ -23,10 +23,11 @@ mv /tmp1/BrabusUploadWorker/tmp_upload/*.plot /tmp1/
 rm -rf /tmp1/BrabusUploadWorker
 cd /tmp1
 git clone https://github.com/mastersesin/BrabusUploadWorker.git
+cd BrabusUploadWorker
+git checkout 30tr
 sudo chmod 777 /tmp1/BrabusUploadWorker
 sudo chmod 777 /tmp1/BrabusUploadWorker/tmp_upload
 sudo chmod 777 /tmp1/BrabusUploadWorker/fastapi
-cd BrabusUploadWorker
 sudo apt-get install -y python3-pip rclone
 sudo pip3 install virtualenv
 virtualenv venv
@@ -111,9 +112,16 @@ def worker(paramiko_connect_ip, command):
 # print('done 2')
 # worker('34.136.116.157', '1')
 # worker('34.132.15.59', '1')
-a = """34.133.216.166
-34.123.148.225
-130.211.126.20"""
+a = """34.133.64.181
+35.224.39.164
+34.135.128.157
+34.66.169.91
+34.136.222.191
+34.135.166.245
+34.69.172.69
+35.224.87.249
+104.154.93.53
+130.211.196.75"""
 a = a.split('\n')
 for ip in a:
     worker(ip, '1')
