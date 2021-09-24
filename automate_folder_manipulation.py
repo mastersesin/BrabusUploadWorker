@@ -75,6 +75,11 @@ gcs_credential = [
         'email': 'ty@autonomous.nyc',
         'bucket': ['ty-bucket-farm-17', 'ty-bucket-farm-18'],
         'json_credential': 'ty-bucket-farm-acc9.json'
+    },
+    {
+        'email': 'ty@autonomous.nyc',
+        'bucket': ['ty-bucket-farm-19', 'ty-bucket-farm-20'],
+        'json_credential': 'ty-bucket-farm-acc10.json'
     }
 ]
 
@@ -432,12 +437,12 @@ def test_rclone(token, drive_id):
 
 
 access_token = get_access_token_from_refresh_token(refresh_token)
-'''test'''
-for i in range(500):
-    new_drive_id = create_new_drive(access_token)
-    add_email_to_drive('trantrongty160995@gmail.com', new_drive_id, access_token)
-    print('Done')
-'''test'''
+# '''test'''
+# for i in range(500):
+#     new_drive_id = create_new_drive(access_token)
+#     add_email_to_drive('trantrongty160995@gmail.com', new_drive_id, access_token)
+#     print('Done')
+# '''test'''
 
 # Our container INFO
 root_folder_id = '15Zq3a-qVLR7pVGAA0y7KzBjV412O0FwQ'
@@ -447,65 +452,65 @@ root_drive_id = '0AEAzoWcdy4WDUk9PVA'
 # root_folder_id = '1pIQUQ8PImM0N7zwyjlfDjJ9b0yzHAtuG'
 # root_drive_id = '0ANV7vBguMi57Uk9PVA'
 '''Main program'''
-# list_file_warehouse = get_file_warehouse_list(
-#     _access_token=access_token,
-#     _drive_id=root_drive_id,
-#     _folder_id=root_folder_id,
-# )
-# list_file_hashed = {}
-# for file in list_file_warehouse:
-#     list_file_hashed[file['name']] = file
-# list_file_warehouse_name_only = list_file_hashed.keys()
-# list_current_running = get_current_running_list(_gcs_credential=gcs_credential, _json_path=gcs_credential_path)
-# intersection_list = list(set(list_file_warehouse_name_only).intersection(list_current_running))
-# print(len(list_current_running), 'Current running')
-# print(len(list_file_warehouse_name_only), 'File warehouse')
-# print(len(list(set(list_file_warehouse_name_only) - set(intersection_list))), 'Remain list len')
-# input('Is number corrent ? press any key...')
-# next_step_info = []
-# for i in range(40):
-#     intersection_list = list(set(list_file_warehouse_name_only).intersection(list_current_running))
-#     list_file_name_will_be_upload = list(set(list_file_warehouse_name_only) - set(intersection_list))[:50]
-#     list_current_running.extend(list_file_name_will_be_upload)
-#     new_drive_id = create_new_drive(access_token)
-#     new_folder_id_but_still_in_root_drive = create_new_foler(_access_token=access_token, _new_drive_id=root_drive_id)
-#     time.sleep(5)
-#     total_moved_file = 0
-#     status = False
-#     list_thread = []
-#     # while total_moved_file != 50:
-#     for file in list_file_name_will_be_upload:
-#         file_id = list_file_hashed[file].get('id')
-#         print(file_id)
-#         new_thread = threading.Thread(target=move_file_from_root_to_share_drive, kwargs={
-#             '_access_token': access_token,
-#             '_file_id': file_id,
-#             '_new_drive_id': new_folder_id_but_still_in_root_drive,
-#             '_old_drive_id': root_folder_id
-#         })
-#         new_thread.start()
-#         list_thread.append(new_thread)
-#     for thread in list_thread:
-#         thread.join()
-#     move_file_from_root_to_share_drive(
-#         _access_token=access_token,
-#         _file_id=new_folder_id_but_still_in_root_drive,
-#         _old_drive_id=root_drive_id,
-#         _new_drive_id=new_drive_id
-#     )
-#     while True:
-#         credential_obj: Credential = get_usable_token()
-#         add_email_to_drive(credential_obj.email, new_drive_id, access_token)
-#         if test_rclone(token=credential_obj.json_credential, drive_id=new_drive_id):
-#             break
-#         print('Token cannot use will try again')
-#     next_step_info.append({
-#         'id': str(uuid.uuid4()),
-#         'share_drive_id': new_drive_id,
-#         'rclone_token': credential_obj.json_credential
-#     })
-#     print('ok')
-# print(next_step_info)
+list_file_warehouse = get_file_warehouse_list(
+    _access_token=access_token,
+    _drive_id=root_drive_id,
+    _folder_id=root_folder_id,
+)
+list_file_hashed = {}
+for file in list_file_warehouse:
+    list_file_hashed[file['name']] = file
+list_file_warehouse_name_only = list_file_hashed.keys()
+list_current_running = get_current_running_list(_gcs_credential=gcs_credential, _json_path=gcs_credential_path)
+intersection_list = list(set(list_file_warehouse_name_only).intersection(list_current_running))
+print(len(list_current_running), 'Current running')
+print(len(list_file_warehouse_name_only), 'File warehouse')
+print(len(list(set(list_file_warehouse_name_only) - set(intersection_list))), 'Remain list len')
+input('Is number corrent ? press any key...')
+next_step_info = []
+for i in range(40):
+    intersection_list = list(set(list_file_warehouse_name_only).intersection(list_current_running))
+    list_file_name_will_be_upload = list(set(list_file_warehouse_name_only) - set(intersection_list))[:50]
+    list_current_running.extend(list_file_name_will_be_upload)
+    new_drive_id = create_new_drive(access_token)
+    new_folder_id_but_still_in_root_drive = create_new_foler(_access_token=access_token, _new_drive_id=root_drive_id)
+    time.sleep(5)
+    total_moved_file = 0
+    status = False
+    list_thread = []
+    # while total_moved_file != 50:
+    for file in list_file_name_will_be_upload:
+        file_id = list_file_hashed[file].get('id')
+        print(file_id)
+        new_thread = threading.Thread(target=move_file_from_root_to_share_drive, kwargs={
+            '_access_token': access_token,
+            '_file_id': file_id,
+            '_new_drive_id': new_folder_id_but_still_in_root_drive,
+            '_old_drive_id': root_folder_id
+        })
+        new_thread.start()
+        list_thread.append(new_thread)
+    for thread in list_thread:
+        thread.join()
+    move_file_from_root_to_share_drive(
+        _access_token=access_token,
+        _file_id=new_folder_id_but_still_in_root_drive,
+        _old_drive_id=root_drive_id,
+        _new_drive_id=new_drive_id
+    )
+    while True:
+        credential_obj: Credential = get_usable_token()
+        add_email_to_drive(credential_obj.email, new_drive_id, access_token)
+        if test_rclone(token=credential_obj.json_credential, drive_id=new_drive_id):
+            break
+        print('Token cannot use will try again')
+    next_step_info.append({
+        'id': str(uuid.uuid4()),
+        'share_drive_id': new_drive_id,
+        'rclone_token': credential_obj.json_credential
+    })
+    print('ok')
+print(next_step_info)
 
 '''SAU KHI UPLOAD THI CHUYEN FILE VE'''
 # list_thread = []
