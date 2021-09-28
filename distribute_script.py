@@ -111,7 +111,10 @@ def worker(paramiko_connect_ip, command):
 # print('done 2')
 # worker('34.136.116.157', '1')
 # worker('34.132.15.59', '1')
-a = """34.134.182.152"""
+a = """34.68.56.197
+35.193.46.108
+34.66.91.94
+35.232.205.246"""
 a = a.split('\n')
 for ip in a:
     worker(ip, '1')
