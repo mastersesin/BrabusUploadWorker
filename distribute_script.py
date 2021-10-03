@@ -41,6 +41,7 @@ STARTUP_SCRIPT_2 = """
 cd /tmp1/BrabusUploadWorker
 git fetch
 git checkout 150tr
+git pull
 sudo chmod 777 fastapi
 sudo systemctl restart checkplot.service
 sudo systemctl restart upload.service
@@ -128,8 +129,7 @@ def worker(paramiko_connect_ip, command):
 # print('done 2')
 # worker('34.136.116.157', '1')
 # worker('34.132.15.59', '1')
-a = """35.224.41.60
-34.67.72.9
+a = """34.67.72.9
 35.225.111.217
 34.134.32.0
 34.136.118.81
