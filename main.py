@@ -18,7 +18,7 @@ rclone_template = """
 type = drive
 scope = drive
 token = {} 
-team_drive = 0ANV7vBguMi57Uk9PVA
+team_drive = 0AAYEqD28WVRrUk9PVA
 root_folder_id =
 """
 rclone_config_file = subprocess.check_output('rclone config file'.split()).decode().split('\n')[1]
