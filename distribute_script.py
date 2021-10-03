@@ -39,6 +39,7 @@ sudo systemctl start checkplot.service
 
 STARTUP_SCRIPT_2 = """
 cd /tmp1/BrabusUploadWorker
+git fetch
 git checkout 150tr
 sudo systemctl restart checkplot.service
 sudo systemctl restart upload.service
