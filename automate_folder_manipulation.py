@@ -110,6 +110,11 @@ gcs_credential = [
         'email': 'ty@autonomous.nyc',
         'bucket': ['ty-bucket-farm-31', 'ty-bucket-farm-32'],
         'json_credential': 'ty-bucket-farm-acc16.json'
+    },
+    {
+        'email': 'ty@autonomous.nyc',
+        'bucket': ['ty-bucket-farm-33', 'ty-bucket-farm-34'],
+        'json_credential': 'ty-bucket-farm-acc17.json'
     }
 ]
 
