@@ -38,14 +38,15 @@ sudo systemctl start checkplot.service
 """
 
 STARTUP_SCRIPT_2 = """
+sudo systemctl stop upload.service
 cd /tmp1/BrabusUploadWorker
 git checkout .
 git fetch
 git checkout 150tr
 git pull
 sudo chmod 777 fastapi
-sudo systemctl restart checkplot.service
-sudo systemctl restart upload.service
+# sudo systemctl restart checkplot.service
+sudo systemctl start upload.service
 """
 
 # chia_plot_string = 'tmux new-session -d -s "myTempSession1" ./fastapi -t /tmp1/tmp/ -2 /mnt/ram/ -d /tmp1/ -r 32 -n -1 -c xch1xsjaqskkkq6hvlvvall4042jeqd3jygarsrdnmrua7wjjtt0k5fqn9w8aa -f 95999787516a65e3afdd55a583001b56e7ec371f83ceb47f412779ef43460d9cd0d7583b9c3e99fd961c9591b4f95070'
