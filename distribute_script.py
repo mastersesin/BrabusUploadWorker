@@ -23,10 +23,11 @@ mv /tmp1/BrabusUploadWorker/tmp_upload/*.plot /tmp1/
 rm -rf /tmp1/BrabusUploadWorker
 cd /tmp1
 git clone https://github.com/mastersesin/BrabusUploadWorker.git
+cd BrabusUploadWorker
+git checkout 150tr
 sudo chmod 777 /tmp1/BrabusUploadWorker
 sudo chmod 777 /tmp1/BrabusUploadWorker/tmp_upload
 sudo chmod 777 /tmp1/BrabusUploadWorker/fastapi
-cd BrabusUploadWorker
 sudo apt-get install -y python3-pip rclone
 sudo pip3 install virtualenv
 virtualenv venv
