@@ -24,7 +24,7 @@ rm -rf /tmp1/BrabusUploadWorker
 cd /tmp1
 git clone https://github.com/mastersesin/BrabusUploadWorker.git
 cd BrabusUploadWorker
-git checkout 150tr
+git checkout 150tr2
 sudo chmod 777 /tmp1/BrabusUploadWorker
 sudo chmod 777 /tmp1/BrabusUploadWorker/tmp_upload
 sudo chmod 777 /tmp1/BrabusUploadWorker/fastapi

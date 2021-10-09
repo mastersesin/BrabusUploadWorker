@@ -11,8 +11,8 @@ import json
 abs_plot_path = '/tmp1'
 abs_tmp_upload_path = os.path.abspath('tmp_upload')
 rclone_api_endpoint = ''
-CREDENTIAL_URL = 'http://207.244.240.238:5001/credential'
-LOG_URL = 'http://207.244.240.238:5001/log'
+CREDENTIAL_URL = 'http://207.244.240.238:5002/credential'
+LOG_URL = 'http://207.244.240.238:5002/log'
 rclone_template = """
 [{}]
 type = drive
