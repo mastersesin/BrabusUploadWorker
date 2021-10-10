@@ -145,4 +145,4 @@ a = '''34.136.124.98
 34.121.50.209'''
 a = a.split('\n')
 for ip in a:
-    worker(ip, '6')
+    worker(ip, '1')
