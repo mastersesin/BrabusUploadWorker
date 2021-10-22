@@ -2,7 +2,7 @@ import os
 import subprocess
 import time
 
-chia_plot_string = 'tmux new-session -d -s "myTempSession1" ./fastapi -n -1'
+chia_plot_string = 'tmux new-session -d -s "myTempSession1" ./BrabusUploadWorker/fastapi -n -1'
 
 while True:
     cm_check_status_code = os.system('pidof fastapi')
