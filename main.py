@@ -12,8 +12,8 @@ abs_plot_path = '/tmp1'
 abs_tmp_upload_path = '/BrabusUploadWorker/tmp_upload'
 rclone_api_endpoint = ''
 DRIVE_ID = '0ANV7vBguMi57Uk9PVA'
-CREDENTIAL_URL = f'http://207.244.240.238:5000/credential?drive={DRIVE_ID}'
-LOG_URL = 'http://207.244.240.238:5000/log'
+CREDENTIAL_URL = f'http://34.123.34.239:5000/credential?drive={DRIVE_ID}'
+LOG_URL = 'http://34.123.34.239:5000/log'
 rclone_template = """
 [{}]
 type = drive
