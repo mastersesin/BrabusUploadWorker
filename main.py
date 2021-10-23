@@ -11,14 +11,15 @@ import json
 abs_plot_path = '/tmp1'
 abs_tmp_upload_path = '/BrabusUploadWorker/tmp_upload'
 rclone_api_endpoint = ''
-CREDENTIAL_URL = 'http://207.244.240.238:5000/credential'
+DRIVE_ID = '0ANV7vBguMi57Uk9PVA'
+CREDENTIAL_URL = f'http://207.244.240.238:5000/credential?drive={DRIVE_ID}'
 LOG_URL = 'http://207.244.240.238:5000/log'
 rclone_template = """
 [{}]
 type = drive
 scope = drive
 token = {} 
-team_drive = 0ANV7vBguMi57Uk9PVA
+team_drive = {}
 root_folder_id =
 """
 rclone_config_file = subprocess.check_output('rclone config file'.split()).decode().split('\n')[1]
@@ -28,15 +29,13 @@ def get_unused_credential():
     json_response_obj = requests.get(CREDENTIAL_URL)
     if json_response_obj.status_code == 200:
         json_credential = json_response_obj.json().get('message').get('json_credential')
-        email = json_response_obj.json().get('message').get('email')
-        return json.dumps(json_credential), email
+        return json.dumps(json_credential)
     else:
-        return False, False
+        return False
 
 
-def post_log(file_name, email):
-    ip = requests.get('https://bot.whatismyipaddress.com').text
-    requests.post(LOG_URL, json={'ip': ip, 'file_name': file_name, 'email': email})
+def post_log(file_name):
+    requests.post(LOG_URL, json={'file_name': file_name})
 
 
 def upload_worker(file_name):
@@ -55,7 +54,8 @@ def upload_worker(file_name):
     ))
     os.system("echo '{}' >> {}".format(rclone_template.format(
         rclone_mount_name,
-        credential
+        credential,
+        DRIVE_ID
     ), rclone_config_file))
 
     # Test drive
