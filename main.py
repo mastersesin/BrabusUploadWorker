@@ -40,12 +40,10 @@ def post_log(file_name):
 
 def upload_worker(file_name):
     logging.info('Upload worker started')
-    credential, email = get_unused_credential()
+    credential = get_unused_credential()
     if not credential:
         logging.info('Can not get credential')
         return
-    if not email:
-        email = 'error'
     rclone_mount_name = str(uuid.uuid4())
     file_uuid = rclone_mount_name
     os.system('mv {} {}'.format(
@@ -90,7 +88,7 @@ def upload_worker(file_name):
     else:
         os.system('rclone config delete {}'.format(rclone_mount_name))
         os.system('rm -rf {}'.format(os.path.join(abs_tmp_upload_path, file_name)))
-        post_log(file_name, email)
+        post_log(file_name)
 
 
 def main():
