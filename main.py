@@ -9,7 +9,7 @@ import requests
 import json
 
 abs_plot_path = '/tmp1'
-abs_tmp_upload_path = '/BrabusUploadWorker/tmp_upload'
+abs_tmp_upload_path = '/tmp_upload'
 rclone_api_endpoint = ''
 DRIVE_ID = '0ANV7vBguMi57Uk9PVA'
 CREDENTIAL_URL = f'http://34.123.34.239:5000/credential?drive={DRIVE_ID}'
@@ -60,7 +60,7 @@ def upload_worker(file_name):
 
     # Test drive
     logging.info('Start test upload session'.format(file_name, file_uuid))
-    command_return_obj_test = subprocess.run('rclone copyto /BrabusUploadWorker/{} {}:testdrive/{}.csv'.format(
+    command_return_obj_test = subprocess.run('rclone copyto {} {}:testdrive/{}.csv'.format(
         'upload.service',
         rclone_mount_name,
         str(uuid.uuid4())
